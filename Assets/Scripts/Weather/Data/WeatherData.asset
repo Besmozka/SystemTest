@@ -9,8 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0b9239d19998744596f900515ede313, type: 3}
-  m_Name: GameSettingsInstaller
+  m_Script: {fileID: 11500000, guid: 637d77054f324c3293fd6a2ad6d548f0, type: 3}
+  m_Name: WeatherData
   m_EditorClassIdentifier: 
-  weatherData: {fileID: 11400000, guid: 8a96a3d006859a24996451aa31bbc829, type: 2}
-  clickerData: {fileID: 11400000, guid: dc9bfbb4197e22746a36a4ccf7569040, type: 2}
+  WeatherApiUrl: https://api.weather.gov/gridpoints/TOP/32,81/forecast
+  AutoRequestTime: 5
+  DogsApiUrl: https://dogapi.dog/docs/api-v2
+  DogsApiKey: breeds

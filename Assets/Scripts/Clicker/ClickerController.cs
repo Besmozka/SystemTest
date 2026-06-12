@@ -1,7 +1,8 @@
 using System;
 using System.Threading;
-using Clicker.UI;
+using Clicker;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace;
 using R3;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
@@ -13,11 +14,10 @@ namespace Clicker
     {
         private IClickerView _clickerView;
         private IGoldModel _goldModel;
-        
         private IEnergyModel _energyModel;
-        private IEnergyRecharger _energyRecharger;
-        
-        private IAutoClickerService _autoClickerService;
+        private IAutoExecuter _energyRecharger;
+        private IAutoExecuter _autoClickerService;
+        private VFXController _clickerVfx;
         
         private ClickerData _clickerData;
 
@@ -25,8 +25,9 @@ namespace Clicker
         private CompositeDisposable _disposables;
 
         public ClickerController(IClickerView clickerView, IGoldModel goldModel,
-            IEnergyModel energyModel, IAutoClickerService autoClickerService,
-            IEnergyRecharger energyRecharger, ClickerData clickerData)
+            IEnergyModel energyModel, ClickerData clickerData,
+            [Inject(Id = "AutoClickerService")] IAutoExecuter autoClickerService,
+            [Inject(Id = "EnergyRecharger")] IAutoExecuter energyRecharger)
         {
             _clickerView = clickerView;
             
@@ -53,7 +54,7 @@ namespace Clicker
                 .Subscribe(_ => OnClick())
                 .AddTo(_disposables);
 
-            _autoClickerService.OnAutoClick
+            _autoClickerService.OnExecute
                 .AsObservable()
                 .Subscribe(_ => OnClick())
                 .AddTo(_disposables);
@@ -75,7 +76,7 @@ namespace Clicker
                 })
                 .AddTo(_disposables);
             
-            _energyRecharger.OnEnergyRecharge
+            _energyRecharger.OnExecute
                 .AsObservable()
                 .Subscribe(_ => AddEnergy())
                 .AddTo(_disposables);
@@ -90,12 +91,14 @@ namespace Clicker
         {
             _goldModel.AddGold(_clickerData.ClickGoldCost);
             _energyModel.RemoveEnergy(_clickerData.ClickEnergyCost);
+            
+            _clickerVfx.SpawnEffects(_clickerView.ButtonPosition);
         }
 
         private void StartAutoServices()
         {
-            _autoClickerService.AutoClick(_cts.Token).Forget();
-            _energyRecharger.ChargeEnergy(_cts.Token).Forget();
+            _autoClickerService.Execute(_cts.Token).Forget();
+            _energyRecharger.Execute(_cts.Token).Forget();
         }
 
         public void Dispose()

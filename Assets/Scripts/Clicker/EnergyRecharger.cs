@@ -1,28 +1,16 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace;
 using R3;
 
-public class EnergyRecharger : IEnergyRecharger
+public class EnergyRecharger : AutoExecuterAsync
 {
-    private Subject<Unit> _onEnergyRecharge = new ();
-    public Subject<Unit> OnEnergyRecharge => _onEnergyRecharge;
+    protected override int Delay => (int)_clickerData.EnergyIncreaseTime;
     
     private ClickerData _clickerData;
-
+    
     public EnergyRecharger(ClickerData clickerData)
     {
         _clickerData = clickerData;
-    }
-
-    public async UniTaskVoid ChargeEnergy(CancellationToken ct)
-    {
-        while (true)
-        {
-            if (ct.IsCancellationRequested) break;
-
-            await UniTask.Delay((int)_clickerData.EnergyIncreaseTime * 1000, cancellationToken: ct);
-        
-            _onEnergyRecharge.OnNext(Unit.Default);
-        }
     }
 }

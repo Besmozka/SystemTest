@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Mime;
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
@@ -11,7 +12,6 @@ public class NavigationPanel : MonoBehaviour, INavigationPanel
     [SerializeField] private Button clickerButton;
     [SerializeField] private Button weatherButton;
     [SerializeField] private Button dogsButton;
-    
     
     private Subject<Unit> _clickerButton = new ();
     public Subject<Unit> ClickerCommand => _clickerButton;

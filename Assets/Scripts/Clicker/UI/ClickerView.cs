@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Clicker.UI;
+using Clicker;
 using R3;
 using TMPro;
 using UnityEngine;
@@ -15,6 +15,9 @@ public class ClickerView : MonoBehaviour, IClickerView
     [SerializeField] private TextMeshProUGUI energyText;
     [SerializeField] private Slider energySlider;
 
+    private RectTransform _rectTransform;
+    public Vector3 ButtonPosition => _rectTransform.anchoredPosition;
+    
     private Subject<Unit> _clickedCommand = new ();
     public Subject<Unit> ClickedCommand => _clickedCommand;
 
@@ -23,6 +26,8 @@ public class ClickerView : MonoBehaviour, IClickerView
         clickButton.OnClickAsObservable()
             .Subscribe(_clickedCommand.OnNext)
             .AddTo(this);
+
+        _rectTransform = GetComponent<RectTransform>();
     }
 
     public void UpdateGoldText(string gold)
