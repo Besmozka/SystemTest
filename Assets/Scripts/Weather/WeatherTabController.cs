@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using DefaultNamespace;
+using Dogs;
 using R3;
 using Server;
 using UnityEngine;
@@ -9,32 +9,31 @@ using Zenject;
 
 namespace Weather
 {
-    public class WeatherController : IDisposable
+    public class WeatherTabController : IDisposable, ITabController
     {
         private WeatherData _weatherData;
-        private IWeatherView _view;
+        private IWeatherView _weatherView;
         private IWeatherModel _weatherModel;
         private IAutoExecuter _autoWeatherRequest;
         private IRequestsController _requestsController;
+        private IBlockPanel _blockPanel;
         
-        private INavigationPanel _navigationPanel;
         private WeatherRequest _currentRequest;
 
         private CancellationTokenSource _cts;
-        private IDisposable _requestsSubscription;
         private CompositeDisposable _disposables;
 
-        public WeatherController(WeatherData weatherData, 
+        public WeatherTabController(WeatherData weatherData, 
             [Inject(Id = "AutoWeatherRequest")] IAutoExecuter autoWeatherRequest,
-            IWeatherView view, IWeatherModel weatherModel,
-            IRequestsController requestsController, INavigationPanel navigationPanel)
+            IWeatherView weatherView, IWeatherModel weatherModel,
+            IRequestsController requestsController, IBlockPanel blockPanel)
         {
             _weatherData = weatherData;
             _autoWeatherRequest = autoWeatherRequest;
-            _view = view;
+            _weatherView = weatherView;
             _weatherModel = weatherModel;
             _requestsController = requestsController;
-            _navigationPanel = navigationPanel;
+            _blockPanel = blockPanel;
             
             _cts = new CancellationTokenSource();
             _disposables = new CompositeDisposable();
@@ -46,24 +45,16 @@ namespace Weather
         {
             _weatherModel.Temperature
                 .Select(temp => $"{temp} F")
-                .Subscribe(temp => _view.ShowTemperatureText(temp))
-                .AddTo(_disposables);
-
-            _navigationPanel.WeatherCommand
-                .Subscribe(_ => StartService())
-                .AddTo(_disposables);
-            
-            _navigationPanel.ClickerCommand
-                .Subscribe(_ => StopService())
-                .AddTo(_disposables);
-            _navigationPanel.DogsCommand
-                .Subscribe(_ => StopService())
+                .Subscribe(temp => _weatherView.ShowTemperatureText(temp))
                 .AddTo(_disposables);
         }
 
-        private void StartService()
+        public void StartService()
         {
             Debug.Log("Starting weather service");
+            
+            _cts?.Dispose();
+            _cts = new CancellationTokenSource();
             
             SendRequest();
             
@@ -79,23 +70,43 @@ namespace Weather
             _currentRequest = new WeatherRequest(_weatherData.WeatherApiUrl);
 
             _currentRequest.OnTemperatureReceived
-                .Subscribe(temp => _weatherModel.SetTemperature(temp))
+                .Subscribe(temp =>
+                {
+                    _weatherModel.SetTemperature(temp);
+                    _blockPanel.Unblock();
+                })
                 .AddTo(_disposables);
+            
+            _blockPanel.Block();
             
             _requestsController.EnqueueRequest(_currentRequest);
         }
         
-        private void StopService()
+        public void StopService()
         {
             _requestsController.DequeueRequest(_currentRequest);
-            _cts.Cancel();
+            _cts?.Cancel();
+        }
+
+        public void ShowTab()
+        {
+            _weatherView.SetActive(true);
+            
+            StartService();
+        }
+
+        public void HideTab()
+        {
+            _weatherView.SetActive(false);
+            
+            StopService();
         }
         
         public void Dispose()
         {
-            _cts.Cancel();
-            _cts.Dispose();
+            _cts?.Dispose();
             _currentRequest?.Dispose();
+            _requestsController.Dispose();
             _disposables?.Dispose();
         }
     }

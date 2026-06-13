@@ -22,4 +22,9 @@ public class WeatherView : MonoBehaviour, IWeatherView
     {
         temperatureBlock.SetActive(false);
     }
+
+    public void SetActive(bool active)
+    {
+        gameObject.SetActive(active);
+    }
 }

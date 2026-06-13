@@ -12,31 +12,41 @@ namespace Server
         private UnityWebRequest _request;
         protected abstract string RequestUrl { get; }
         protected abstract void ProcessData(string data);
+        private bool _isProcessing;
         
         public async UniTask SendRequest(CancellationToken ct)
         {
-            Debug.Log($"Send request {this.GetType().Name}, URL: {RequestUrl}");
+            if (_isProcessing) return;
+            _isProcessing = true;
             
+            Debug.Log($"Send request {this.GetType().Name}, URL {RequestUrl}");
+    
             var requestUrl = RequestUrl;
-            
+    
             if (string.IsNullOrEmpty(requestUrl))
             {
                 CompleteRequest(null);
                 return;
             }
-
+            
             _request = UnityWebRequest.Get(requestUrl);
-            
-            await _request.SendWebRequest().WithCancellation(ct);
-            
-            if (_request.result != UnityWebRequest.Result.Success)
+    
+            try
             {
-                Debug.LogError($"Ошибка: {_request.error}");
+                await _request.SendWebRequest().WithCancellation(ct);
             }
-            else
+            catch (OperationCanceledException)
             {
-                CompleteRequest(_request.downloadHandler.text);
+                Debug.Log($"Request canceled {this.GetType().Name}");
+                return;
             }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                return;
+            }
+            
+            CompleteRequest(_request.downloadHandler.text);
         }
 
         private void CompleteRequest(string data)
@@ -44,12 +54,16 @@ namespace Server
             ProcessData(data);
             Done();
         }
-
+        
         public void Done()
         {
-            _request?.Abort();
-            _request?.Dispose();
-            _request = null;
+            if (_isProcessing)
+            {
+                _request?.Abort();
+                _request?.Dispose();
+            }
+
+            _isProcessing = false;
         }
 
         public virtual void Dispose()

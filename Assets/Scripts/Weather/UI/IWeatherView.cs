@@ -4,5 +4,6 @@ namespace Weather
     {
         public void ShowTemperatureText(string text);
         public void HideTemperatureText();
+        public void SetActive(bool active);
     }
 }

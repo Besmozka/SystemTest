@@ -44,4 +44,9 @@ public class ClickerView : MonoBehaviour, IClickerView
     {
         energySlider.value = energy;
     }
+
+    public void SetActive(bool active)
+    {
+        gameObject.SetActive(active);
+    }
 }

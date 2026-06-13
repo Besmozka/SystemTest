@@ -4,5 +4,7 @@ namespace Server
     {
         public void EnqueueRequest(BackendRequest request) { }
         public void DequeueRequest(BackendRequest request) { }
+
+        public void Dispose();
     }
 }

@@ -7,20 +7,25 @@ using UnityEngine;
 
 namespace Server
 {
-    public class RequestsController : IRequestsController, IDisposable
+    public class RequestsController : IRequestsController
     {
-        private Queue<BackendRequest> _requestQueue = new Queue<BackendRequest>();
+        private List<BackendRequest> _requestQueue;
         private BackendRequest _currentRequest;
 
         private bool _isProcessing;
 
-        private CancellationTokenSource _cts = new();
+        private CancellationTokenSource _cts;
+
+        public RequestsController()
+        {
+            _requestQueue = new List<BackendRequest>();
+        }
 
         public void EnqueueRequest(BackendRequest request)
         {
             Debug.Log($"Enqueue request {request.GetType().Name}");
             
-            _requestQueue.Enqueue(request);
+            _requestQueue.Insert(0, request);
             
             if (!_isProcessing)
             {
@@ -34,13 +39,17 @@ namespace Server
             
             if (_currentRequest != null && _currentRequest.Equals(request))
             {
-                _currentRequest.Done();
+                _cts?.Cancel();
                 return;
             }
             
-            if (_requestQueue.Count == 0) return;
+            if (_requestQueue.Count == 0 || !_requestQueue.Contains(request)) return;
+
+            var index = _requestQueue.IndexOf(request);
+            var doneRequest = _requestQueue[index];
+            doneRequest.Done();
             
-            _requestQueue.Dequeue().Done();
+            _requestQueue.RemoveAt(index);
         }
 
         private async UniTaskVoid ProcessQueue()
@@ -49,19 +58,22 @@ namespace Server
 
             while (_requestQueue.Count > 0)
             {
-                _currentRequest = _requestQueue.Dequeue();
+                var lastIndex = _requestQueue.Count - 1;
+                _currentRequest = _requestQueue[lastIndex];
+                _requestQueue.RemoveAt(lastIndex);
 
-                Debug.Log($"Send request {_currentRequest.GetType().Name}");
-                
+                _cts?.Dispose();
+                _cts = new CancellationTokenSource();
+        
                 await _currentRequest.SendRequest(_cts.Token);
             }
 
             _isProcessing = false;
         }
 
+
         public void Dispose()
         {
-            _cts.Cancel();
             _cts?.Dispose();
         }
     }

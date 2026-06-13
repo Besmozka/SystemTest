@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b60dea37083bb964b8a5b10c9f479bd1, type: 3}
   m_Name: DogsData
   m_EditorClassIdentifier: 
-  DogsApiUrl: https://dogapi.dog/api/v2/
+  DogsApiUrl: https://dogapi.dog/api/v2
   DogsApiKey: breeds

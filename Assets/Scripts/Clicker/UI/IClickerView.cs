@@ -13,5 +13,7 @@ namespace Clicker
         public void UpdateEnergyText(string energy) { }
 
         public void UpdateEnergySlider(float energy) { }
+        
+        public void SetActive(bool active);
     }
 }

@@ -11,8 +11,14 @@ namespace DefaultNamespace
         
         protected abstract int Delay { get; }
         
+        private bool _isExecuting;
+        
         public async UniTaskVoid Execute(CancellationToken ct)
         {
+            if (_isExecuting) return;
+            
+            _isExecuting = true;
+            
             while (true)
             {
                 if (ct.IsCancellationRequested) break;

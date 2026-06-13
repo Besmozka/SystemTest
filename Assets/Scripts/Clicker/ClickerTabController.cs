@@ -1,16 +1,12 @@
 using System;
 using System.Threading;
-using Clicker;
-using Cysharp.Threading.Tasks;
 using DefaultNamespace;
 using R3;
-using UnityEngine;
-using UnityEngine.PlayerLoop;
 using Zenject;
 
 namespace Clicker
 {
-    public class ClickerController : IDisposable
+    public class ClickerTabController : IDisposable, ITabController
     {
         private IClickerView _clickerView;
         private IGoldModel _goldModel;
@@ -18,20 +14,18 @@ namespace Clicker
         private IAutoExecuter _energyRecharger;
         private IAutoExecuter _autoClickerService;
         private IVFXController _clickerVfx;
-        private INavigationPanel _navigationPanel;
         
         private ClickerData _clickerData;
 
         private CancellationTokenSource _cts;
         private CompositeDisposable _disposables;
 
-        public ClickerController(IClickerView clickerView, IGoldModel goldModel, INavigationPanel navigationPanel,
+        public ClickerTabController(IClickerView clickerView, IGoldModel goldModel,
             IEnergyModel energyModel, ClickerData clickerData, IVFXController clickerVfx,
             [Inject(Id = "AutoClickerService")] IAutoExecuter autoClickerService,
             [Inject(Id = "EnergyRecharger")] IAutoExecuter energyRecharger)
         {
             _clickerView = clickerView;
-            _navigationPanel = navigationPanel;
             
             _goldModel = goldModel;
             _energyModel = energyModel;
@@ -42,12 +36,9 @@ namespace Clicker
             
             _clickerData = clickerData;
 
-            _cts = new CancellationTokenSource();
             _disposables = new CompositeDisposable();
             
             Init();
-            
-            StartAutoServices();
         }
 
         private void Init()
@@ -83,17 +74,6 @@ namespace Clicker
                 .AsObservable()
                 .Subscribe(_ => AddEnergy())
                 .AddTo(_disposables);
-            
-            _navigationPanel.WeatherCommand
-                .Subscribe(_ => StartAutoServices())
-                .AddTo(_disposables);
-            
-            _navigationPanel.ClickerCommand
-                .Subscribe(_ => StopAutoServices())
-                .AddTo(_disposables);
-            _navigationPanel.DogsCommand
-                .Subscribe(_ => StopAutoServices())
-                .AddTo(_disposables);
         }
 
         private void AddEnergy()
@@ -109,21 +89,39 @@ namespace Clicker
             _clickerVfx.SpawnEffects(_clickerView.ButtonTransform);
         }
 
-        private void StartAutoServices()
+        private void StartServices()
         {
+            _cts?.Dispose();
+            _cts = new CancellationTokenSource();
+            
             _autoClickerService.Execute(_cts.Token).Forget();
             _energyRecharger.Execute(_cts.Token).Forget();
         }
 
-        private void StopAutoServices()
+        private void StopServices()
         {
-            _cts.Cancel();
+            _cts?.Cancel();
+        }
+
+        public void ShowTab()
+        {
+            _clickerView.SetActive(true);
+            
+            StartServices();
+        }
+
+        public void HideTab()
+        {
+            _clickerView.SetActive(false);
+            
+            StopServices();
+
+            _clickerVfx.HideAllVFX();
         }
 
         public void Dispose()
         {
-            _cts.Cancel();
-            _cts.Dispose();
+            _cts?.Dispose();
             _disposables?.Dispose();
         }
     }
