@@ -44,7 +44,7 @@ namespace Weather
         private void Init()
         {
             _weatherModel.Temperature
-                .Select(temp => $"{temp} F")
+                .Select(temp => $"Сегодня:  {temp} F")
                 .Subscribe(temp => _weatherView.ShowTemperatureText(temp))
                 .AddTo(_disposables);
         }

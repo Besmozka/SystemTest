@@ -10,14 +10,14 @@ using Zenject;
 public class SceneInstaller : MonoInstaller
 {
     [Header("Tab views")]
-    [SerializeField] private ClickerView _clickerView;
-    [SerializeField] private WeatherView _weatherView;
-    [SerializeField] private DogsView _dogsView;
+    [SerializeField] private GameObject _clickerViewPrefab;
+    [SerializeField] private GameObject _weatherViewPrefab;
+    [SerializeField] private GameObject _dogsViewPrefab;
     
     [Header("Common")]
     [SerializeField] private NavigationPanel _navigationPanel;
     [SerializeField] private BlockPanel _blockPanel;
-    [SerializeField] private PopUpPanel _popUpPanel;
+    [SerializeField] private GameObject _popUpPanelPrefab;
     [SerializeField] private GameObject _effectsItemPrefab;
     
     public override void InstallBindings()
@@ -43,10 +43,10 @@ public class SceneInstaller : MonoInstaller
 
     private void InstallClickerDependency()
     {
-        Container.BindMemoryPool<EffectsItem, EffectItemsPool>().WithMaxSize(50)
-            .FromComponentInNewPrefab(_effectsItemPrefab).UnderTransformGroup("Canvas/ClickerPanel");
+        Container.Bind<IClickerView>().FromComponentInNewPrefab(_clickerViewPrefab).UnderTransformGroup("Canvas/Panels").AsSingle();
         
-        Container.Bind<IClickerView>().FromInstance(_clickerView).AsSingle();
+        Container.BindMemoryPool<EffectsItem, EffectItemsPool>().WithMaxSize(50)
+            .FromComponentInNewPrefab(_effectsItemPrefab).UnderTransformGroup("Canvas/Effects");
 
         Container.Bind<IEnergyModel>().To<EnergyModel>().FromNew().AsSingle();
         Container.Bind<IGoldModel>().To<GoldModel>().FromNew().AsSingle();
@@ -60,7 +60,7 @@ public class SceneInstaller : MonoInstaller
     
     private void InstallWeatherDependency()
     {
-        Container.Bind<IWeatherView>().FromInstance(_weatherView).AsSingle();
+        Container.Bind<IWeatherView>().FromComponentInNewPrefab(_weatherViewPrefab).UnderTransformGroup("Canvas/Panels").AsSingle();
 
         Container.Bind<IWeatherModel>().To<WeatherModel>().FromNew().AsSingle();
         
@@ -71,8 +71,8 @@ public class SceneInstaller : MonoInstaller
 
     private void InstallDogsTabDependency()
     {
-        Container.Bind<IDogsView>().FromInstance(_dogsView).AsSingle();
-        Container.Bind<IPopUpPanel>().FromInstance(_popUpPanel).AsSingle();
+        Container.Bind<IDogsView>().FromComponentInNewPrefab(_dogsViewPrefab).UnderTransformGroup("Canvas/Panels").AsSingle();
+        Container.Bind<IPopUpPanel>().FromComponentInNewPrefab(_popUpPanelPrefab).UnderTransformGroup("Canvas/Panels/DogsPanel(Clone)").AsSingle();
 
         Container.BindInterfacesAndSelfTo<DogsTabController>().AsSingle();
     }
