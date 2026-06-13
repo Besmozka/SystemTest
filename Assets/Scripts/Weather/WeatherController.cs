@@ -20,23 +20,23 @@ namespace Weather
         private INavigationPanel _navigationPanel;
         private WeatherRequest _currentRequest;
 
-        private CancellationToken _ct;
+        private CancellationTokenSource _cts;
         private IDisposable _requestsSubscription;
         private CompositeDisposable _disposables;
 
-        public WeatherController(WeatherData weatherData, CancellationToken ct,
+        public WeatherController(WeatherData weatherData, 
             [Inject(Id = "AutoWeatherRequest")] IAutoExecuter autoWeatherRequest,
             IWeatherView view, IWeatherModel weatherModel,
             IRequestsController requestsController, INavigationPanel navigationPanel)
         {
             _weatherData = weatherData;
-            _ct = ct;
             _autoWeatherRequest = autoWeatherRequest;
             _view = view;
             _weatherModel = weatherModel;
             _requestsController = requestsController;
             _navigationPanel = navigationPanel;
             
+            _cts = new CancellationTokenSource();
             _disposables = new CompositeDisposable();
 
             Init();
@@ -67,7 +67,7 @@ namespace Weather
             
             SendRequest();
             
-            _autoWeatherRequest.Execute(_ct).Forget();
+            _autoWeatherRequest.Execute(_cts.Token).Forget();
 
             _autoWeatherRequest.OnExecute
                 .Subscribe(_ => SendRequest())
@@ -88,10 +88,13 @@ namespace Weather
         private void StopService()
         {
             _requestsController.DequeueRequest(_currentRequest);
+            _cts.Cancel();
         }
         
         public void Dispose()
         {
+            _cts.Cancel();
+            _cts.Dispose();
             _currentRequest?.Dispose();
             _disposables?.Dispose();
         }

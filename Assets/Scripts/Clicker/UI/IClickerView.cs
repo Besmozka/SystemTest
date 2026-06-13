@@ -5,7 +5,7 @@ namespace Clicker
 {
     public interface IClickerView
     {
-        public Vector3 ButtonPosition { get; }
+        public RectTransform ButtonTransform { get; }
         public Subject<Unit> ClickedCommand { get; }
         
         public void UpdateGoldText(string gold) { }

@@ -11,15 +11,12 @@ public class SceneInstaller : MonoInstaller
     [SerializeField] private ClickerView _clickerView;
     [SerializeField] private WeatherView _weatherView;
     
-    
     [SerializeField] private NavigationPanel _navigationPanel;
     
-    private CancellationTokenSource _cts;
+    [SerializeField] private GameObject _effectsItemPrefab;
     
     public override void InstallBindings()
     {
-        _cts = new CancellationTokenSource();
-
         InstallCommonDependency();
         
         InstallClickerDependency();
@@ -29,14 +26,16 @@ public class SceneInstaller : MonoInstaller
 
     private void InstallCommonDependency()
     {
-        Container.Bind<INavigationPanel>().To<NavigationPanel>().FromInstance(_navigationPanel).AsSingle();
-        Container.BindInterfacesAndSelfTo<CancellationToken>().FromInstance(_cts.Token).AsCached();
+        Container.Bind<INavigationPanel>().FromInstance(_navigationPanel).AsSingle();
         
         Container.BindInterfacesAndSelfTo<RequestsController>().FromNew().AsSingle();
     }
 
     private void InstallClickerDependency()
     {
+        Container.BindMemoryPool<EffectsItem, EffectItemsPool>().WithMaxSize(50)
+            .FromComponentInNewPrefab(_effectsItemPrefab).UnderTransformGroup("Canvas").AsSingle();
+        
         Container.Bind<IClickerView>().FromInstance(_clickerView).AsSingle();
 
         Container.Bind<IEnergyModel>().To<EnergyModel>().FromNew().AsSingle();
@@ -45,6 +44,7 @@ public class SceneInstaller : MonoInstaller
         Container.Bind<IAutoExecuter>().WithId("AutoClickerService").To<AutoClickerService>().FromNew().AsSingle();
         Container.Bind<IAutoExecuter>().WithId("EnergyRecharger").To<EnergyRecharger>().FromNew().AsSingle();
         
+        Container.BindInterfacesAndSelfTo<VFXController>().AsSingle();
         Container.BindInterfacesAndSelfTo<ClickerController>().AsSingle();
     }
     

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Server
 {
@@ -17,6 +18,8 @@ namespace Server
 
         public void EnqueueRequest(BackendRequest request)
         {
+            Debug.Log($"Enqueue request {request.GetType().Name}");
+            
             _requestQueue.Enqueue(request);
             
             if (!_isProcessing)
@@ -27,7 +30,9 @@ namespace Server
 
         public void DequeueRequest(BackendRequest request)
         {
-            if (_currentRequest.Equals(request))
+            Debug.Log($"Dequeue request {_currentRequest?.GetType().Name}");
+            
+            if (_currentRequest != null && _currentRequest.Equals(request))
             {
                 _currentRequest.Done();
                 return;
@@ -46,6 +51,8 @@ namespace Server
             {
                 _currentRequest = _requestQueue.Dequeue();
 
+                Debug.Log($"Send request {_currentRequest.GetType().Name}");
+                
                 await _currentRequest.SendRequest(_cts.Token);
             }
 

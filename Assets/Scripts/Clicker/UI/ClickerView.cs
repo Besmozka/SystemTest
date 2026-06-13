@@ -16,7 +16,7 @@ public class ClickerView : MonoBehaviour, IClickerView
     [SerializeField] private Slider energySlider;
 
     private RectTransform _rectTransform;
-    public Vector3 ButtonPosition => _rectTransform.anchoredPosition;
+    public RectTransform ButtonTransform => _rectTransform;
     
     private Subject<Unit> _clickedCommand = new ();
     public Subject<Unit> ClickedCommand => _clickedCommand;
@@ -27,7 +27,7 @@ public class ClickerView : MonoBehaviour, IClickerView
             .Subscribe(_clickedCommand.OnNext)
             .AddTo(this);
 
-        _rectTransform = GetComponent<RectTransform>();
+        _rectTransform = clickButton.GetComponent<RectTransform>();
     }
 
     public void UpdateGoldText(string gold)

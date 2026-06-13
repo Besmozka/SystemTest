@@ -8,11 +8,14 @@ public class GameSettingsInstaller : ScriptableObjectInstaller<GameSettingsInsta
     [SerializeField] private WeatherData weatherData;
     [SerializeField] private ClickerData clickerData;
     [SerializeField] private DogsData dogsData;
+    [SerializeField] private BackgroundData backgroundData;
     
     public override void InstallBindings()
     {
         Container.BindInstance(weatherData).AsCached();
         Container.BindInstance(clickerData).AsCached();
         Container.BindInstance(dogsData).AsCached();
+        
+        Container.BindInstance(backgroundData).AsCached();
     }
 }

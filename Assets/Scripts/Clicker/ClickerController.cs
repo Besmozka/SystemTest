@@ -17,25 +17,28 @@ namespace Clicker
         private IEnergyModel _energyModel;
         private IAutoExecuter _energyRecharger;
         private IAutoExecuter _autoClickerService;
-        private VFXController _clickerVfx;
+        private IVFXController _clickerVfx;
+        private INavigationPanel _navigationPanel;
         
         private ClickerData _clickerData;
 
         private CancellationTokenSource _cts;
         private CompositeDisposable _disposables;
 
-        public ClickerController(IClickerView clickerView, IGoldModel goldModel,
-            IEnergyModel energyModel, ClickerData clickerData,
+        public ClickerController(IClickerView clickerView, IGoldModel goldModel, INavigationPanel navigationPanel,
+            IEnergyModel energyModel, ClickerData clickerData, IVFXController clickerVfx,
             [Inject(Id = "AutoClickerService")] IAutoExecuter autoClickerService,
             [Inject(Id = "EnergyRecharger")] IAutoExecuter energyRecharger)
         {
             _clickerView = clickerView;
+            _navigationPanel = navigationPanel;
             
             _goldModel = goldModel;
             _energyModel = energyModel;
             
             _autoClickerService = autoClickerService;
             _energyRecharger = energyRecharger;
+            _clickerVfx = clickerVfx;
             
             _clickerData = clickerData;
 
@@ -80,6 +83,17 @@ namespace Clicker
                 .AsObservable()
                 .Subscribe(_ => AddEnergy())
                 .AddTo(_disposables);
+            
+            _navigationPanel.WeatherCommand
+                .Subscribe(_ => StartAutoServices())
+                .AddTo(_disposables);
+            
+            _navigationPanel.ClickerCommand
+                .Subscribe(_ => StopAutoServices())
+                .AddTo(_disposables);
+            _navigationPanel.DogsCommand
+                .Subscribe(_ => StopAutoServices())
+                .AddTo(_disposables);
         }
 
         private void AddEnergy()
@@ -92,13 +106,18 @@ namespace Clicker
             _goldModel.AddGold(_clickerData.ClickGoldCost);
             _energyModel.RemoveEnergy(_clickerData.ClickEnergyCost);
             
-            _clickerVfx.SpawnEffects(_clickerView.ButtonPosition);
+            _clickerVfx.SpawnEffects(_clickerView.ButtonTransform);
         }
 
         private void StartAutoServices()
         {
             _autoClickerService.Execute(_cts.Token).Forget();
             _energyRecharger.Execute(_cts.Token).Forget();
+        }
+
+        private void StopAutoServices()
+        {
+            _cts.Cancel();
         }
 
         public void Dispose()

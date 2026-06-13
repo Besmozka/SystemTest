@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weatherData: {fileID: 11400000, guid: 8a96a3d006859a24996451aa31bbc829, type: 2}
   clickerData: {fileID: 11400000, guid: dc9bfbb4197e22746a36a4ccf7569040, type: 2}
+  dogsData: {fileID: 11400000, guid: 1d05a945f24d84b4391b38e278df95b5, type: 2}
+  backgroundData: {fileID: 11400000, guid: 7671a0fcdddc018419ba5e4a0c553c09, type: 2}
