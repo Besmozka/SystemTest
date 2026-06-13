@@ -9,15 +9,15 @@ using Zenject;
 
 public class SceneInstaller : MonoInstaller
 {
-    [Header("Tab views")]
+    [Header("Panels Prefabs")]
     [SerializeField] private GameObject _clickerViewPrefab;
     [SerializeField] private GameObject _weatherViewPrefab;
     [SerializeField] private GameObject _dogsViewPrefab;
+    [SerializeField] private GameObject _popUpPanelPrefab;
     
     [Header("Common")]
     [SerializeField] private NavigationPanel _navigationPanel;
     [SerializeField] private BlockPanel _blockPanel;
-    [SerializeField] private GameObject _popUpPanelPrefab;
     [SerializeField] private GameObject _effectsItemPrefab;
     
     public override void InstallBindings()
