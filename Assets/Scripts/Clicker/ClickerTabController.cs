@@ -83,8 +83,9 @@ namespace Clicker
 
         private void OnClick()
         {
+            if (!_energyModel.TryRemoveEnergy(_clickerData.ClickEnergyCost)) return;
+            
             _goldModel.AddGold(_clickerData.ClickGoldCost);
-            _energyModel.RemoveEnergy(_clickerData.ClickEnergyCost);
             
             _clickerVfx.SpawnEffects(_clickerView.ButtonTransform);
         }

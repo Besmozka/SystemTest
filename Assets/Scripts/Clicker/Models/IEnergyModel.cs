@@ -9,6 +9,9 @@ namespace Clicker
         
         public void AddEnergy(int energyToAdd) { }
 
-        public void RemoveEnergy(int energyToRemove) { }
+        public bool TryRemoveEnergy(int energyToRemove)
+        {
+            return false;
+        }
     }
 }

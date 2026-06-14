@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Server
 {
-    public class RequestsController : IRequestsController
+    public class RequestsController : IRequestsController, IDisposable
     {
         private List<BackendRequest> _requestQueue;
         private BackendRequest _currentRequest;

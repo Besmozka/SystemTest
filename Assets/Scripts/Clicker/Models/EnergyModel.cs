@@ -29,12 +29,14 @@ public class EnergyModel : IEnergyModel
         }
     }
 
-    public void RemoveEnergy(int energyToRemove)
+    public bool TryRemoveEnergy(int energyToRemove)
     {
-        if (_currentEnergy.Value == 0) return;
+        if (_currentEnergy.Value == 0) return false;
         
         _currentEnergy.Value -= energyToRemove;
         
         if (_currentEnergy.Value < 0) _currentEnergy.Value = 0;
+        
+        return true;
     }
 }

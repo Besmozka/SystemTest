@@ -65,6 +65,8 @@ public class SceneInstaller : MonoInstaller
         Container.Bind<IWeatherModel>().To<WeatherModel>().FromNew().AsSingle();
         
         Container.Bind<IAutoExecuter>().WithId("AutoWeatherRequest").To<AutoWeatherRequest>().FromNew().AsSingle();
+
+        Container.Bind<IWeatherApiService>().To<WeatherApiService>().FromNew().AsSingle();
         
         Container.BindInterfacesAndSelfTo<WeatherTabController>().AsSingle();
     }
@@ -74,6 +76,8 @@ public class SceneInstaller : MonoInstaller
         Container.Bind<IDogsView>().FromComponentInNewPrefab(_dogsViewPrefab).UnderTransformGroup("Canvas/Panels").AsSingle();
         Container.Bind<IPopUpPanel>().FromComponentInNewPrefab(_popUpPanelPrefab).UnderTransformGroup("Canvas/Panels/DogsPanel(Clone)").AsSingle();
 
+        Container.Bind<IDogsApiService>().To<DogsApiService>().FromNew().AsSingle();
+        
         Container.BindInterfacesAndSelfTo<DogsTabController>().AsSingle();
     }
 
